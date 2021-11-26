@@ -3,10 +3,11 @@ package flow
 import (
 	"context"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
-var AllMethods = []string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodConnect, http.MethodOptions, http.MethodTrace}
+var allMethods = []string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodConnect, http.MethodOptions, http.MethodTrace}
 
 type contextKey string
 
@@ -46,7 +47,7 @@ func (m *Mux) Handle(pattern string, handler http.Handler, methods ...string) {
 	}
 
 	if len(methods) == 0 {
-		methods = AllMethods
+		methods = allMethods
 	}
 
 	for _, method := range methods {
@@ -145,8 +146,22 @@ func (r *route) match(ctx context.Context, urlSegments []string) (context.Contex
 		}
 
 		if strings.HasPrefix(routeSegment, ":") {
-			ctx = context.WithValue(ctx, contextKey(routeSegment), urlSegments[i])
-		} else if urlSegments[i] != routeSegment {
+			pipe := strings.Index(routeSegment, "|")
+			if pipe == -1 {
+				ctx = context.WithValue(ctx, contextKey(routeSegment), urlSegments[i])
+				continue
+			}
+
+			rx := regexp.MustCompile(routeSegment[pipe+1:])
+			if rx.MatchString(urlSegments[i]) {
+				ctx = context.WithValue(ctx, contextKey(routeSegment[:pipe]), urlSegments[i])
+				continue
+			}
+
+			return ctx, false
+		}
+
+		if urlSegments[i] != routeSegment {
 			return ctx, false
 		}
 	}
