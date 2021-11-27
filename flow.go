@@ -12,12 +12,7 @@ var allMethods = []string{http.MethodGet, http.MethodHead, http.MethodPost, http
 type contextKey string
 
 func Param(ctx context.Context, param string) string {
-	s, ok := ctx.Value(contextKey(param)).(string)
-	if !ok {
-		return ""
-	}
-
-	return s
+	return ctx.Value(contextKey(param)).(string)
 }
 
 type Mux struct {
@@ -85,26 +80,24 @@ func (m *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if r.Method == route.method {
 				route.handler.ServeHTTP(w, r.WithContext(ctx))
 				return
-			} else {
-				if !contains(allowedMethods, route.method) {
-					allowedMethods = append(allowedMethods, route.method)
-				}
+			}
+			if !contains(allowedMethods, route.method) {
+				allowedMethods = append(allowedMethods, route.method)
 			}
 		}
 	}
 
-	if len(allowedMethods) == 0 {
-		m.wrap(m.NotFound).ServeHTTP(w, r)
+	if len(allowedMethods) > 0 {
+		w.Header().Set("Allow", strings.Join(append(allowedMethods, http.MethodOptions), ", "))
+		if r.Method == http.MethodOptions {
+			m.wrap(m.Options).ServeHTTP(w, r)
+		} else {
+			m.wrap(m.MethodNotAllowed).ServeHTTP(w, r)
+		}
 		return
 	}
 
-	w.Header().Set("Allow", strings.Join(append(allowedMethods, http.MethodOptions), ", "))
-
-	if r.Method == http.MethodOptions {
-		m.wrap(m.Options).ServeHTTP(w, r)
-	} else {
-		m.wrap(m.MethodNotAllowed).ServeHTTP(w, r)
-	}
+	m.wrap(m.NotFound).ServeHTTP(w, r)
 }
 
 func (m *Mux) wrap(handler http.Handler) http.Handler {
