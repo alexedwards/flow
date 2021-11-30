@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var allMethods = []string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodConnect, http.MethodOptions, http.MethodTrace}
+var AllMethods = []string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodConnect, http.MethodOptions, http.MethodTrace}
 
 type contextKey string
 
@@ -42,7 +42,7 @@ func (m *Mux) Handle(pattern string, handler http.Handler, methods ...string) {
 	}
 
 	if len(methods) == 0 {
-		methods = allMethods
+		methods = AllMethods
 	}
 
 	for _, method := range methods {
@@ -141,13 +141,13 @@ func (r *route) match(ctx context.Context, urlSegments []string) (context.Contex
 		if strings.HasPrefix(routeSegment, ":") {
 			pipe := strings.Index(routeSegment, "|")
 			if pipe == -1 {
-				ctx = context.WithValue(ctx, contextKey(routeSegment), urlSegments[i])
+				ctx = context.WithValue(ctx, contextKey(routeSegment[1:]), urlSegments[i])
 				continue
 			}
 
 			rx := regexp.MustCompile(routeSegment[pipe+1:])
 			if rx.MatchString(urlSegments[i]) {
-				ctx = context.WithValue(ctx, contextKey(routeSegment[:pipe]), urlSegments[i])
+				ctx = context.WithValue(ctx, contextKey(routeSegment[1:pipe]), urlSegments[i])
 				continue
 			}
 
