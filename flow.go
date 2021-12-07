@@ -140,7 +140,7 @@ func (r *route) match(ctx context.Context, urlSegments []string) (context.Contex
 
 		if strings.HasPrefix(routeSegment, ":") {
 			pipe := strings.Index(routeSegment, "|")
-			if pipe == -1 {
+			if pipe == -1 && urlSegments[i] != "" {
 				ctx = context.WithValue(ctx, contextKey(routeSegment[1:]), urlSegments[i])
 				continue
 			}

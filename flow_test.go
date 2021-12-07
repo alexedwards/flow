@@ -138,6 +138,33 @@ func TestMatching(t *testing.T) {
 			"GET", "/slashes/four/",
 			http.StatusNotFound, nil, "",
 		},
+		// empty segments
+		{
+			[]string{"GET"}, "/baz/:id/:age",
+			"GET", "/baz/123/",
+			http.StatusNotFound, nil, "",
+		},
+		{
+			[]string{"GET"}, "/baz/:id/:age/",
+			"GET", "/baz/123//",
+			http.StatusNotFound, nil, "",
+		},
+		{
+			[]string{"GET"}, "/baz/:id/:age",
+			"GET", "/baz//21",
+			http.StatusNotFound, nil, "",
+		},
+		{
+			[]string{"GET"}, "/baz//:age",
+			"GET", "/baz//21",
+			http.StatusOK, nil, "",
+		},
+		{
+			// with a regexp to specifically allow empty segments
+			[]string{"GET"}, "/baz/:id|^$/:age/",
+			"GET", "/baz//21/",
+			http.StatusOK, nil, "",
+		},
 		// methods
 		{
 			[]string{"POST"}, "/one",
