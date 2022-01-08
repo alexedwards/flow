@@ -43,10 +43,8 @@ func main() {
     // Initialize a new router.
     mux := flow.New()
 
-    // Create a route which dispatches `GET /greet/:name` requests to the
-    // `greet` handler. This : character is used to define a named parameter in
-    // the URL path, so this route will be used for requests like `GET /greet/alice` 
-    // and `GET /greet/bob`.
+    // Add a `GET /greet/:name` route. The : character is used to denote a 
+    // named parameter in the URL path, which acts like a 'wildcard'.
     mux.HandleFunc("/greet/:name", greet, "GET")
 
     err := http.ListenAndServe(":2323", mux)
@@ -103,7 +101,7 @@ mux.Group(func(mux *flow.Mux) {
 
 ### Notes
 
-* Routes are matched in the order that they are declared.
+* Conflicting routes are permitted (e.g. `/posts/:id` and `posts/new`). Routes are matched in the order that they are declared.
 * Trailing slashes are significant (`/profile/:id` and `/profile/:id/` are not the same).
 * An `Allow` header is automatically set for all `OPTIONS` and `405 Method Not Allowed` responses (including when using custom handlers). 
 

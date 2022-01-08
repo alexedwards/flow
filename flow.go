@@ -1,3 +1,63 @@
+// Package flow is a delightfully simple, readable, and tiny HTTP router for Go web applications. Its features include:
+//
+// * Use named parameters, wildcards and (optionally) regexp patterns in your routes.
+// * Create route groups which use different middleware (a bit like chi).
+// * Customizable handlers for 404 Not Found and 405 Method Not Allowed responses.
+// * Automatic handling of OPTIONS and HEAD requests.
+// * Works with http.Handler, http.HandlerFunc, and standard Go middleware.
+//
+// Example code:
+//
+//	package main
+//
+//	import (
+//		"fmt"
+//		"log"
+//		"net/http"
+//
+//		"github.com/alexedwards/flow"
+//	)
+//
+//	func main() {
+//		mux := flow.New()
+//
+//		// The Use() method can be used to register middleware. Middleware declared at
+//		// the top level will used on all routes (including error handlers and OPTIONS
+//		// responses).
+//		mux.Use(exampleMiddleware1)
+//
+//		// Routes can use multiple HTTP methods.
+//		mux.HandleFunc("/profile/:name", exampleHandlerFunc1, "GET", "POST")
+//
+//		// Optionally, regular expressions can be used to enforce a specific pattern
+//		// for a named parameter.
+//		mux.HandleFunc("/profile/:name/:age|^[0-9]{1,3}$", exampleHandlerFunc2, "GET")
+//
+//		// The wildcard ... can be used to match the remainder of a request path.
+//		// Notice that HTTP methods are also optional (if not provided, all HTTP
+//		// methods will match the route).
+//		mux.Handle("/static/...", exampleHandler)
+//
+//		// You can create route 'groups'.
+//		mux.Group(func(mux *flow.Mux) {
+//			// Middleware declared within in the group will only be used on the routes
+//			// in the group.
+//			mux.Use(exampleMiddleware2)
+//
+//			mux.HandleFunc("/admin", exampleHandlerFunc3, "GET")
+//
+//			// Groups can be nested.
+//			mux.Group(func(mux *flow.Mux) {
+//				mux.Use(exampleMiddleware3)
+//
+//				mux.HandleFunc("/admin/passwords", exampleHandlerFunc4, "GET")
+//			})
+//		})
+//
+//		err := http.ListenAndServe(":2323", mux)
+//		log.Fatal(err)
+//	}
+//
 package flow
 
 import (
@@ -7,14 +67,18 @@ import (
 	"strings"
 )
 
+// AllMethods is a slice containing all HTTP request methods.
 var AllMethods = []string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodConnect, http.MethodOptions, http.MethodTrace}
 
 type contextKey string
 
+// Param is used to retreive the value of a named parameter from the request
+// context.
 func Param(ctx context.Context, param string) string {
 	return ctx.Value(contextKey(param)).(string)
 }
 
+// Mux is a http.Handler which dispatches requests to different handlers.
 type Mux struct {
 	NotFound         http.Handler
 	MethodNotAllowed http.Handler
@@ -23,6 +87,7 @@ type Mux struct {
 	middlewares      []func(http.Handler) http.Handler
 }
 
+// New returns a new initalized Mux instance.
 func New() *Mux {
 	return &Mux{
 		NotFound: http.NotFoundHandler(),
@@ -36,6 +101,8 @@ func New() *Mux {
 	}
 }
 
+// Handle registers a new handler for the given request path pattern and HTTP
+// methods.
 func (m *Mux) Handle(pattern string, handler http.Handler, methods ...string) {
 	if contains(methods, http.MethodGet) && !contains(methods, http.MethodHead) {
 		methods = append(methods, http.MethodHead)
@@ -57,19 +124,27 @@ func (m *Mux) Handle(pattern string, handler http.Handler, methods ...string) {
 	}
 }
 
+// HandleFunc is an adapter which allows using a http.HandlerFunc as a handler.
 func (m *Mux) HandleFunc(pattern string, fn http.HandlerFunc, methods ...string) {
 	m.Handle(pattern, fn, methods...)
 }
 
+// Use registers middleware with the Mux instance. Middleware must have the
+// signature `func(http.Handler) http.Handler`.
 func (m *Mux) Use(mw func(http.Handler) http.Handler) {
 	m.middlewares = append(m.middlewares, mw)
 }
 
+// Group is used to create 'groups' of routes in a Mux. Middleware registered
+// inside the group will only be used on the routes in that group. See the
+// example code at the start of the package documentation for how to use this
+// feature.
 func (m *Mux) Group(fn func(*Mux)) {
 	mm := *m
 	fn(&mm)
 }
 
+// ServeHTTP makes the router implement the http.Handler interface.
 func (m *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	urlSegments := strings.Split(r.URL.Path, "/")
 	allowedMethods := []string{}
