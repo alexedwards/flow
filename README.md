@@ -16,6 +16,7 @@ Flow is a simple but powerful router. It packs in a bunch of features that you'l
 * **Customizable handlers** for `404 Not Found` and `405 Method Not Allowed` responses.
 * **Automatic handling** of `OPTIONS` and `HEAD` requests.
 * Works with `http.Handler`, `http.HandlerFunc`, and standard Go middleware.
+* No dependencies.
 * Tiny, readable, codebase (~160 lines of code).
 
 ---
