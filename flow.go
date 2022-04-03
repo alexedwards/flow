@@ -113,6 +113,10 @@ func (m *Mux) Handle(pattern string, handler http.Handler, methods ...string) {
 	}
 
 	for _, method := range methods {
+		if !contains(AllMethods, method) {
+			panic("unsupported HTTP method: " + method)
+		}
+
 		route := route{
 			method:   strings.ToUpper(method),
 			segments: strings.Split(pattern, "/"),
