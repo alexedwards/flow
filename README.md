@@ -69,14 +69,14 @@ mux := flow.New()
 // The Use() method can be used to register middleware. Middleware declared at
 // the top level will used on all routes (including error handlers and OPTIONS
 // responses).
-mux.Use(exampleMiddleware)
+mux.Use(exampleMiddleware1)
 
 // Routes can use multiple HTTP methods.
-mux.HandleFunc("/profile/:name", exampleHandlerFunc, "GET", "POST")
+mux.HandleFunc("/profile/:name", exampleHandlerFunc1, "GET", "POST")
 
 // Optionally, regular expressions can be used to enforce a specific pattern
 // for a named parameter.
-mux.HandleFunc("/profile/:name/:age|^[0-9]{1,3}$", exampleHandlerFunc, "GET")
+mux.HandleFunc("/profile/:name/:age|^[0-9]{1,3}$", exampleHandlerFunc2, "GET")
 
 // The wildcard ... can be used to match the remainder of a request path.
 // Notice that HTTP methods are also optional (if not provided, all HTTP
@@ -87,15 +87,15 @@ mux.Handle("/static/...", exampleHandler)
 mux.Group(func(mux *flow.Mux) {
     // Middleware declared within in the group will only be used on the routes
     // in the group.
-    mux.Use(exampleMiddleware)
+    mux.Use(exampleMiddleware2)
 
-    mux.HandleFunc("/admin", exampleHandler, "GET")
+    mux.HandleFunc("/admin", exampleHandlerFunc3, "GET")
 
     // Groups can be nested.
     mux.Group(func(mux *flow.Mux) {
-        mux.Use(exampleMiddleware)
+        mux.Use(exampleMiddleware3)
 
-        mux.HandleFunc("/admin/passwords", exampleHandlerFunc, "GET")
+        mux.HandleFunc("/admin/passwords", exampleHandlerFunc4, "GET")
     })
 })
 ```
