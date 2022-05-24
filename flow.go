@@ -72,8 +72,8 @@ var AllMethods = []string{http.MethodGet, http.MethodHead, http.MethodPost, http
 
 type contextKey string
 
-// Param is used to retreive the value of a named parameter from the request
-// context.
+// Param is used to retrieve the value of a named parameter or wildcard from the
+// request context.
 func Param(ctx context.Context, param string) string {
 	return ctx.Value(contextKey(param)).(string)
 }
@@ -210,6 +210,7 @@ func (r *route) match(ctx context.Context, urlSegments []string) (context.Contex
 		}
 
 		if routeSegment == "..." {
+			ctx = context.WithValue(ctx, contextKey("..."), strings.Join(urlSegments[i:], "/"))
 			return ctx, true
 		}
 

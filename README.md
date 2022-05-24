@@ -80,7 +80,8 @@ mux.HandleFunc("/profile/:name/:age|^[0-9]{1,3}$", exampleHandlerFunc2, "GET")
 
 // The wildcard ... can be used to match the remainder of a request path.
 // Notice that HTTP methods are also optional (if not provided, all HTTP
-// methods will match the route).
+// methods will match the route). The value of the wildcard can be retrieved 
+// by calling flow.Param("...").
 mux.Handle("/static/...", exampleHandler)
 
 // You can create route 'groups'.

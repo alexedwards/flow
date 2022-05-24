@@ -57,12 +57,12 @@ func TestMatching(t *testing.T) {
 		{
 			[]string{"GET"}, "/prefix/...",
 			"GET", "/prefix/anything/else",
-			http.StatusOK, nil, "",
+			http.StatusOK, map[string]string{"...": "anything/else"}, "",
 		},
 		{
 			[]string{"GET"}, "/prefix/...",
 			"GET", "/prefix/",
-			http.StatusOK, nil, "",
+			http.StatusOK, map[string]string{"...": ""}, "",
 		},
 		{
 			[]string{"GET"}, "/prefix/...",
@@ -109,8 +109,8 @@ func TestMatching(t *testing.T) {
 		// kitchen sink
 		{
 			[]string{"GET"}, "/path-params/:id/:era|^[0-9]{2}$/...",
-			"GET", "/path-params/abc/12/foo/bar",
-			http.StatusOK, map[string]string{"id": "abc", "era": "12"}, "",
+			"GET", "/path-params/abc/12/foo/bar/baz",
+			http.StatusOK, map[string]string{"id": "abc", "era": "12", "...": "foo/bar/baz"}, "",
 		},
 		{
 			[]string{"GET"}, "/path-params/:id/:era|^[0-9]{2}$/...",
