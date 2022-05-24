@@ -9,7 +9,7 @@ A delightfully tiny but powerful HTTP router for Go web applications
 
 ---
 
-Flow is a simple but powerful router. It packs in a bunch of features that you'll probably like:
+Flow packs in a bunch of features that you'll probably like:
 
 * Use **named parameters**, **wildcards** and (optionally) **regexp patterns** in your routes.
 * Create route **groups which use different middleware** (a bit like chi).
