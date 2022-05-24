@@ -87,7 +87,7 @@ type Mux struct {
 	middlewares      []func(http.Handler) http.Handler
 }
 
-// New returns a new initalized Mux instance.
+// New returns a new initialized Mux instance.
 func New() *Mux {
 	return &Mux{
 		NotFound: http.NotFoundHandler(),
