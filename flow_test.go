@@ -356,50 +356,59 @@ func TestMiddleware(t *testing.T) {
 	m.HandleFunc("/baz", hf, "GET")
 
 	var tests = []struct {
-		RequestMethod string
-		RequestPath   string
-		ExpectedUsed  string
+		RequestMethod  string
+		RequestPath    string
+		ExpectedUsed   string
+		ExpectedStatus int
 	}{
 		{
-			RequestMethod: "GET",
-			RequestPath:   "/",
-			ExpectedUsed:  "12",
+			RequestMethod:  "GET",
+			RequestPath:    "/",
+			ExpectedUsed:   "12",
+			ExpectedStatus: http.StatusOK,
 		},
 		{
-			RequestMethod: "GET",
-			RequestPath:   "/foo",
-			ExpectedUsed:  "1234",
+			RequestMethod:  "GET",
+			RequestPath:    "/foo",
+			ExpectedUsed:   "1234",
+			ExpectedStatus: http.StatusOK,
 		},
 		{
-			RequestMethod: "GET",
-			RequestPath:   "/nested/foo",
-			ExpectedUsed:  "12345",
+			RequestMethod:  "GET",
+			RequestPath:    "/nested/foo",
+			ExpectedUsed:   "12345",
+			ExpectedStatus: http.StatusOK,
 		},
 		{
-			RequestMethod: "GET",
-			RequestPath:   "/bar",
-			ExpectedUsed:  "126",
+			RequestMethod:  "GET",
+			RequestPath:    "/bar",
+			ExpectedUsed:   "126",
+			ExpectedStatus: http.StatusOK,
 		},
 		{
-			RequestMethod: "GET",
-			RequestPath:   "/baz",
-			ExpectedUsed:  "12",
+			RequestMethod:  "GET",
+			RequestPath:    "/baz",
+			ExpectedUsed:   "12",
+			ExpectedStatus: http.StatusOK,
 		},
 		// Check top-level middleware used on errors and OPTIONS
 		{
-			RequestMethod: "GET",
-			RequestPath:   "/notfound",
-			ExpectedUsed:  "12",
+			RequestMethod:  "GET",
+			RequestPath:    "/notfound",
+			ExpectedUsed:   "12",
+			ExpectedStatus: http.StatusNotFound,
 		},
 		{
-			RequestMethod: "POST",
-			RequestPath:   "/nested/foo",
-			ExpectedUsed:  "12",
+			RequestMethod:  "POST",
+			RequestPath:    "/nested/foo",
+			ExpectedUsed:   "12",
+			ExpectedStatus: http.StatusMethodNotAllowed,
 		},
 		{
-			RequestMethod: "OPTIONS",
-			RequestPath:   "/nested/foo",
-			ExpectedUsed:  "12",
+			RequestMethod:  "OPTIONS",
+			RequestPath:    "/nested/foo",
+			ExpectedUsed:   "12",
+			ExpectedStatus: http.StatusNoContent,
 		},
 	}
 
@@ -411,7 +420,14 @@ func TestMiddleware(t *testing.T) {
 			t.Errorf("NewRequest: %s", err)
 		}
 
-		m.ServeHTTP(httptest.NewRecorder(), r)
+		rr := httptest.NewRecorder()
+		m.ServeHTTP(rr, r)
+
+		rs := rr.Result()
+
+		if rs.StatusCode != test.ExpectedStatus {
+			t.Errorf("%s %s: expected status %d but was %d", test.RequestMethod, test.RequestPath, test.ExpectedStatus, rs.StatusCode)
+		}
 
 		if used != test.ExpectedUsed {
 			t.Errorf("%s %s: middleware used: expected %q; got %q", test.RequestMethod, test.RequestPath, test.ExpectedUsed, used)
