@@ -215,15 +215,18 @@ func (r *route) match(ctx context.Context, urlSegments []string) (context.Contex
 		}
 
 		if strings.HasPrefix(routeSegment, ":") {
-			pipe := strings.Index(routeSegment, "|")
-			if pipe == -1 && urlSegments[i] != "" {
-				ctx = context.WithValue(ctx, contextKey(routeSegment[1:]), urlSegments[i])
-				continue
+			key, rxPattern, containsRx := strings.Cut(strings.TrimPrefix(routeSegment, ":"), "|")
+
+			if containsRx {
+				rx := regexp.MustCompile(rxPattern)
+				if rx.MatchString(urlSegments[i]) {
+					ctx = context.WithValue(ctx, contextKey(key), urlSegments[i])
+					continue
+				}
 			}
 
-			rx := regexp.MustCompile(routeSegment[pipe+1:])
-			if rx.MatchString(urlSegments[i]) {
-				ctx = context.WithValue(ctx, contextKey(routeSegment[1:pipe]), urlSegments[i])
+			if !containsRx && urlSegments[i] != "" {
+				ctx = context.WithValue(ctx, contextKey(key), urlSegments[i])
 				continue
 			}
 
