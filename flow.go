@@ -125,10 +125,14 @@ func (m *Mux) Handle(pattern string, handler http.Handler, methods ...string) {
 		*m.routes = append(*m.routes, route)
 	}
 
+	// Compile any regular expression patterns and add them to the
+	// compiledRXPatterns map.
 	for _, segment := range strings.Split(pattern, "/") {
-		_, rxPattern, containsRx := strings.Cut(segment, "|")
-		if containsRx {
-			compiledRXPatterns[rxPattern] = regexp.MustCompile(rxPattern)
+		if strings.HasPrefix(segment, ":") {
+			_, rxPattern, containsRx := strings.Cut(segment, "|")
+			if containsRx {
+				compiledRXPatterns[rxPattern] = regexp.MustCompile(rxPattern)
+			}
 		}
 	}
 }
