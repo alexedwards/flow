@@ -338,8 +338,7 @@ func TestMiddleware(t *testing.T) {
 	m.HandleFunc("/", hf, "GET")
 
 	m.Group(func(m *Mux) {
-		m.Use(mw3)
-		m.Use(mw4)
+		m.Use(mw3, mw4)
 		m.HandleFunc("/foo", hf, "GET")
 
 		m.Group(func(m *Mux) {

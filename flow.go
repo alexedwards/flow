@@ -131,8 +131,8 @@ func (m *Mux) HandleFunc(pattern string, fn http.HandlerFunc, methods ...string)
 
 // Use registers middleware with the Mux instance. Middleware must have the
 // signature `func(http.Handler) http.Handler`.
-func (m *Mux) Use(mw func(http.Handler) http.Handler) {
-	m.middlewares = append(m.middlewares, mw)
+func (m *Mux) Use(mw ...func(http.Handler) http.Handler) {
+	m.middlewares = append(m.middlewares, mw...)
 }
 
 // Group is used to create 'groups' of routes in a Mux. Middleware registered
