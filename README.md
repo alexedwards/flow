@@ -106,6 +106,16 @@ mux.Group(func(mux *flow.Mux) {
 * Conflicting routes are permitted (e.g. `/posts/:id` and `posts/new`). Routes are matched in the order that they are declared.
 * Trailing slashes are significant (`/profile/:id` and `/profile/:id/` are not the same).
 * An `Allow` header is automatically set for all `OPTIONS` and `405 Method Not Allowed` responses (including when using custom handlers). 
+* Once the `flow.Mux` type is being used by your server, it is *not safe* to add more middleware or routes concurrently.
+* Middleware must be declared *before* a route in order to be used by that route. Any middleware declared after a route won't act on that route. For example:
+
+```go
+mux := flow.New()
+mux.Use(middleware1)
+mux.HandleFunc("/foo", ...) // This route will use middleware1 only.
+mux.Use(middleware2)
+mux.HandleFunc("/bar", ...) // This route will use both middleware1 and middleware2.
+```
 
 ### Contributing
 
