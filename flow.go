@@ -70,6 +70,8 @@ import (
 // AllMethods is a slice containing all HTTP request methods.
 var AllMethods = []string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodConnect, http.MethodOptions, http.MethodTrace}
 
+var compiledRXPatterns = map[string]*regexp.Regexp{}
+
 type contextKey string
 
 // Param is used to retrieve the value of a named parameter or wildcard from the
@@ -121,6 +123,13 @@ func (m *Mux) Handle(pattern string, handler http.Handler, methods ...string) {
 		}
 
 		*m.routes = append(*m.routes, route)
+	}
+
+	for _, segment := range strings.Split(pattern, "/") {
+		_, rxPattern, containsRx := strings.Cut(segment, "|")
+		if containsRx {
+			compiledRXPatterns[rxPattern] = regexp.MustCompile(rxPattern)
+		}
 	}
 }
 
@@ -218,8 +227,7 @@ func (r *route) match(ctx context.Context, urlSegments []string) (context.Contex
 			key, rxPattern, containsRx := strings.Cut(strings.TrimPrefix(routeSegment, ":"), "|")
 
 			if containsRx {
-				rx := regexp.MustCompile(rxPattern)
-				if rx.MatchString(urlSegments[i]) {
+				if compiledRXPatterns[rxPattern].MatchString(urlSegments[i]) {
 					ctx = context.WithValue(ctx, contextKey(key), urlSegments[i])
 					continue
 				}
