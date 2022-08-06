@@ -57,7 +57,6 @@
 //		err := http.ListenAndServe(":2323", mux)
 //		log.Fatal(err)
 //	}
-//
 package flow
 
 import (
@@ -75,9 +74,15 @@ var compiledRXPatterns = map[string]*regexp.Regexp{}
 type contextKey string
 
 // Param is used to retrieve the value of a named parameter or wildcard from the
-// request context.
+// request context. It returns the empty string if no matching parameter is
+// found.
 func Param(ctx context.Context, param string) string {
-	return ctx.Value(contextKey(param)).(string)
+	s, ok := ctx.Value(contextKey(param)).(string)
+	if !ok {
+		return ""
+	}
+
+	return s
 }
 
 // Mux is a http.Handler which dispatches requests to different handlers.
