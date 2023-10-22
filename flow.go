@@ -63,6 +63,7 @@ import (
 	"context"
 	"net/http"
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -111,7 +112,7 @@ func New() *Mux {
 // Handle registers a new handler for the given request path pattern and HTTP
 // methods.
 func (m *Mux) Handle(pattern string, handler http.Handler, methods ...string) {
-	if contains(methods, http.MethodGet) && !contains(methods, http.MethodHead) {
+	if slices.Contains(methods, http.MethodGet) && !slices.Contains(methods, http.MethodHead) {
 		methods = append(methods, http.MethodHead)
 	}
 
@@ -174,7 +175,7 @@ func (m *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				route.handler.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
-			if !contains(allowedMethods, route.method) {
+			if !slices.Contains(allowedMethods, route.method) {
 				allowedMethods = append(allowedMethods, route.method)
 			}
 		}
@@ -199,15 +200,6 @@ func (m *Mux) wrap(handler http.Handler) http.Handler {
 	}
 
 	return handler
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }
 
 type route struct {

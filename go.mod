@@ -1,3 +1,3 @@
 module github.com/alexedwards/flow
 
-go 1.17
+go 1.21
