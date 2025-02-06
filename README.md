@@ -21,6 +21,12 @@ Flow packs in a bunch of features that you'll probably like:
 
 ---
 
+### Project status
+
+This package has reached a **stable** status. It is actively maintained with ongoing bug fixes and essential updates, but significant alterations to the API or behavior are not expected.
+
+---
+
 ### Installation
 
 ```
@@ -119,7 +125,7 @@ mux.HandleFunc("/bar", ...) // This route will use both middleware1 and middlewa
 
 ### Contributing
 
-Bug fixes and documentation improvements are very welcome! For feature additions or behavioral changes, please open an issue to discuss the change before submitting a PR.
+Bug fixes and documentation updates are very welcome. This package is **stable**, so PRs for feature additions or modifications to behavior are less likely to be accepted. If you’d like to propose a change, please open an issue for discussion before submitting a PR.
 
 ### Thanks
 
