@@ -247,10 +247,8 @@ func TestMatching(t *testing.T) {
 	for _, test := range tests {
 		m := New()
 
-		var ctx context.Context
-
 		hf := func(w http.ResponseWriter, r *http.Request) {
-			ctx = r.Context()
+			w.WriteHeader(http.StatusOK)
 		}
 
 		m.HandleFunc(test.RoutePattern, hf, test.RouteMethods...)
@@ -272,9 +270,9 @@ func TestMatching(t *testing.T) {
 
 		if rs.StatusCode == http.StatusOK && len(test.ExpectedParams) > 0 {
 			for expK, expV := range test.ExpectedParams {
-				actualValStr := Param(ctx, expK)
+				actualValStr := r.PathValue(expK)
 				if actualValStr != expV {
-					t.Errorf("Param: context value %s expected \"%s\" but was \"%s\"", expK, expV, actualValStr)
+					t.Errorf("r.PathValue: value %s expected \"%s\" but was \"%s\"", expK, expV, actualValStr)
 				}
 			}
 		}
@@ -497,6 +495,54 @@ func TestCustomHandlers(t *testing.T) {
 
 		if string(body) != test.ExpectedBody {
 			t.Errorf("%s %s: expected body %q; got %q", test.RequestMethod, test.RequestPath, test.ExpectedBody, string(body))
+		}
+	}
+}
+
+func TestPathValue(t *testing.T) {
+	var tests = []struct {
+		RouteMethods []string
+		RoutePattern string
+
+		RequestMethod string
+		RequestPath   string
+
+		ParamName  string
+		HasParam   bool
+		ParamValue string
+	}{
+		{
+			[]string{"GET"}, "/foo/:id",
+			"GET", "/foo/123",
+			"id", true, "123",
+		},
+		{
+			[]string{"GET"}, "/foo/:id",
+			"GET", "/foo/123",
+			"missing", false, "",
+		},
+	}
+
+	for _, test := range tests {
+		m := New()
+
+		hf := func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}
+
+		m.HandleFunc(test.RoutePattern, hf, test.RouteMethods...)
+
+		r, err := http.NewRequest(test.RequestMethod, test.RequestPath, nil)
+		if err != nil {
+			t.Errorf("NewRequest: %s", err)
+		}
+
+		rr := httptest.NewRecorder()
+		m.ServeHTTP(rr, r)
+
+		actualValStr := r.PathValue(test.ParamName)
+		if actualValStr != test.ParamValue {
+			t.Errorf("expected \"%s\" but was \"%s\"", test.ParamValue, actualValStr)
 		}
 	}
 }

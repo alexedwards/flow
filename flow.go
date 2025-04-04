@@ -74,9 +74,7 @@ var compiledRXPatterns = map[string]*regexp.Regexp{}
 
 type contextKey string
 
-// Param is used to retrieve the value of a named parameter or wildcard from the
-// request context. It returns the empty string if no matching parameter is
-// found.
+// Deprecated: Use r.PathValue instead (https://pkg.go.dev/net/http#Request.PathValue).
 func Param(ctx context.Context, param string) string {
 	s, ok := ctx.Value(contextKey(param)).(string)
 	if !ok {
@@ -169,7 +167,7 @@ func (m *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	allowedMethods := []string{}
 
 	for _, route := range *m.routes {
-		ctx, ok := route.match(r.Context(), urlSegments)
+		ctx, ok := route.match(r.Context(), r, urlSegments)
 		if ok {
 			if r.Method == route.method {
 				route.handler.ServeHTTP(w, r.WithContext(ctx))
@@ -209,7 +207,7 @@ type route struct {
 	handler  http.Handler
 }
 
-func (r *route) match(ctx context.Context, urlSegments []string) (context.Context, bool) {
+func (r *route) match(ctx context.Context, rq *http.Request, urlSegments []string) (context.Context, bool) {
 	if !r.wildcard && len(urlSegments) != len(r.segments) {
 		return ctx, false
 	}
@@ -220,6 +218,7 @@ func (r *route) match(ctx context.Context, urlSegments []string) (context.Contex
 		}
 
 		if routeSegment == "..." {
+			rq.SetPathValue("...", strings.Join(urlSegments[i:], "/"))
 			ctx = context.WithValue(ctx, contextKey("..."), strings.Join(urlSegments[i:], "/"))
 			return ctx, true
 		}
@@ -229,12 +228,14 @@ func (r *route) match(ctx context.Context, urlSegments []string) (context.Contex
 
 			if containsRx {
 				if compiledRXPatterns[rxPattern].MatchString(urlSegments[i]) {
+					rq.SetPathValue(key, urlSegments[i])
 					ctx = context.WithValue(ctx, contextKey(key), urlSegments[i])
 					continue
 				}
 			}
 
 			if !containsRx && urlSegments[i] != "" {
+				rq.SetPathValue(key, urlSegments[i])
 				ctx = context.WithValue(ctx, contextKey(key), urlSegments[i])
 				continue
 			}

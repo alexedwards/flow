@@ -59,9 +59,8 @@ func main() {
 }
 
 func greet(w http.ResponseWriter, r *http.Request) {
-    // Use flow.Param() to retrieve the value of the named parameter from the
-    // request context.
-    name := flow.Param(r.Context(), "name")
+    // Retrieve the value of the named parameter from the request.
+    name := r.PathValue("name")
 
     fmt.Fprintf(w, "Hello %s", name)
 }
@@ -87,7 +86,7 @@ mux.HandleFunc("/profile/:name/:age|^[0-9]{1,3}$", exampleHandlerFunc2, "GET")
 // The wildcard ... can be used to match the remainder of a request path.
 // Notice that HTTP methods are also optional (if not provided, all HTTP
 // methods will match the route). The value of the wildcard can be retrieved 
-// by calling flow.Param("...").
+// by calling r.PathValue("...").
 mux.Handle("/static/...", exampleHandler)
 
 // You can create route 'groups'.
@@ -122,10 +121,6 @@ mux.HandleFunc("/foo", ...) // This route will use middleware1 only.
 mux.Use(middleware2)
 mux.HandleFunc("/bar", ...) // This route will use both middleware1 and middleware2.
 ```
-
-### Contributing
-
-Bug fixes and documentation updates are very welcome. This package is **stable**, so PRs for feature additions or modifications to behavior are less likely to be accepted. If you’d like to propose a change, please open an issue for discussion before submitting a PR.
 
 ### Thanks
 
