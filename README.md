@@ -72,7 +72,7 @@ func greet(w http.ResponseWriter, r *http.Request) {
 mux := flow.New()
 
 // The Use() method can be used to register middleware. Middleware declared at
-// the top level will used on all routes (including error handlers and OPTIONS
+// the top level will be used on all routes (including error handlers and OPTIONS
 // responses).
 mux.Use(exampleMiddleware1)
 
@@ -91,7 +91,7 @@ mux.Handle("/static/...", exampleHandler)
 
 // You can create route 'groups'.
 mux.Group(func(mux *flow.Mux) {
-    // Middleware declared within in the group will only be used on the routes
+    // Middleware declared within the group will only be used on the routes
     // in the group.
     mux.Use(exampleMiddleware2)
 
