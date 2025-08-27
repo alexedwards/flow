@@ -72,18 +72,6 @@ var AllMethods = []string{http.MethodGet, http.MethodHead, http.MethodPost, http
 
 var compiledRXPatterns = map[string]*regexp.Regexp{}
 
-type contextKey string
-
-// Deprecated: Use r.PathValue instead (https://pkg.go.dev/net/http#Request.PathValue).
-func Param(ctx context.Context, param string) string {
-	s, ok := ctx.Value(contextKey(param)).(string)
-	if !ok {
-		return ""
-	}
-
-	return s
-}
-
 // Mux is a http.Handler which dispatches requests to different handlers.
 type Mux struct {
 	NotFound         http.Handler
@@ -219,7 +207,6 @@ func (r *route) match(ctx context.Context, rq *http.Request, urlSegments []strin
 
 		if routeSegment == "..." {
 			rq.SetPathValue("...", strings.Join(urlSegments[i:], "/"))
-			ctx = context.WithValue(ctx, contextKey("..."), strings.Join(urlSegments[i:], "/"))
 			return ctx, true
 		}
 
@@ -229,14 +216,12 @@ func (r *route) match(ctx context.Context, rq *http.Request, urlSegments []strin
 			if containsRx {
 				if compiledRXPatterns[rxPattern].MatchString(urlSegments[i]) {
 					rq.SetPathValue(key, urlSegments[i])
-					ctx = context.WithValue(ctx, contextKey(key), urlSegments[i])
 					continue
 				}
 			}
 
 			if !containsRx && urlSegments[i] != "" {
 				rq.SetPathValue(key, urlSegments[i])
-				ctx = context.WithValue(ctx, contextKey(key), urlSegments[i])
 				continue
 			}
 

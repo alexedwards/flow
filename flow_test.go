@@ -1,7 +1,6 @@
 package flow
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -541,56 +540,6 @@ func TestPathValue(t *testing.T) {
 		m.ServeHTTP(rr, r)
 
 		actualValStr := r.PathValue(test.ParamName)
-		if actualValStr != test.ParamValue {
-			t.Errorf("expected \"%s\" but was \"%s\"", test.ParamValue, actualValStr)
-		}
-	}
-}
-
-func TestParams(t *testing.T) {
-	var tests = []struct {
-		RouteMethods []string
-		RoutePattern string
-
-		RequestMethod string
-		RequestPath   string
-
-		ParamName  string
-		HasParam   bool
-		ParamValue string
-	}{
-		{
-			[]string{"GET"}, "/foo/:id",
-			"GET", "/foo/123",
-			"id", true, "123",
-		},
-		{
-			[]string{"GET"}, "/foo/:id",
-			"GET", "/foo/123",
-			"missing", false, "",
-		},
-	}
-
-	for _, test := range tests {
-		m := New()
-
-		var ctx context.Context
-
-		hf := func(w http.ResponseWriter, r *http.Request) {
-			ctx = r.Context()
-		}
-
-		m.HandleFunc(test.RoutePattern, hf, test.RouteMethods...)
-
-		r, err := http.NewRequest(test.RequestMethod, test.RequestPath, nil)
-		if err != nil {
-			t.Errorf("NewRequest: %s", err)
-		}
-
-		rr := httptest.NewRecorder()
-		m.ServeHTTP(rr, r)
-
-		actualValStr := Param(ctx, test.ParamName)
 		if actualValStr != test.ParamValue {
 			t.Errorf("expected \"%s\" but was \"%s\"", test.ParamValue, actualValStr)
 		}
