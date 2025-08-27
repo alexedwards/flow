@@ -62,6 +62,7 @@ package flow
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"regexp"
 	"slices"
 	"strings"
@@ -213,15 +214,20 @@ func (r *route) match(ctx context.Context, rq *http.Request, urlSegments []strin
 		if strings.HasPrefix(routeSegment, ":") {
 			key, rxPattern, containsRx := strings.Cut(strings.TrimPrefix(routeSegment, ":"), "|")
 
+			unescapedValue, err := url.QueryUnescape(urlSegments[i])
+			if err != nil {
+				return ctx, false
+			}
+
 			if containsRx {
-				if compiledRXPatterns[rxPattern].MatchString(urlSegments[i]) {
-					rq.SetPathValue(key, urlSegments[i])
+				if compiledRXPatterns[rxPattern].MatchString(unescapedValue) {
+					rq.SetPathValue(key, unescapedValue)
 					continue
 				}
 			}
 
-			if !containsRx && urlSegments[i] != "" {
-				rq.SetPathValue(key, urlSegments[i])
+			if !containsRx && unescapedValue != "" {
+				rq.SetPathValue(key, unescapedValue)
 				continue
 			}
 

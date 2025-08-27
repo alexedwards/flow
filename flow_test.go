@@ -97,7 +97,7 @@ func TestMatching(t *testing.T) {
 		{
 			[]string{"GET"}, "/path-params/:era",
 			"GET", "/path-params/a%3A%2F%2Fb%2Fc",
-			http.StatusOK, map[string]string{"era": "a%3A%2F%2Fb%2Fc"}, "",
+			http.StatusOK, map[string]string{"era": "a://b/c"}, "",
 		},
 		// regexp
 		{
