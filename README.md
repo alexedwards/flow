@@ -23,7 +23,7 @@ Flow packs in a bunch of features that you'll probably like:
 
 ### Project status
 
-This package has reached a **stable** status as of `v1.0.0`. It is actively maintained with ongoing bug fixes and essential updates, but significant alterations to the API or behavior are not expected.
+This package has reached a **stable** status as of `v1.0.0`. It is actively maintained with ongoing bug fixes and essential updates, and significant alterations to the API or behavior are not expected.
 
 ---
 
