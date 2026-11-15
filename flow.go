@@ -220,7 +220,7 @@ func (r *route) match(ctx context.Context, rq *http.Request, urlSegments []strin
 		if strings.HasPrefix(routeSegment, ":") {
 			key, rxPattern, containsRx := strings.Cut(strings.TrimPrefix(routeSegment, ":"), "|")
 
-			unescapedValue, err := url.QueryUnescape(urlSegments[i])
+			unescapedValue, err := url.PathUnescape(urlSegments[i])
 			if err != nil {
 				return ctx, false
 			}
