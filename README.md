@@ -2,7 +2,7 @@
 
 ![Flow](https://raw.githubusercontent.com/alexedwards/flow/assets/flow-sm.png)
         
-[![Go Reference](https://pkg.go.dev/badge/github.com/alexedwards/flow.svg)](https://pkg.go.dev/github.com/alexedwards/flow) [![Go Report Card](https://goreportcard.com/badge/github.com/alexedwards/flow)](https://goreportcard.com/report/github.com/alexedwards/flow) [![MIT](https://img.shields.io/github/license/alexedwards/flow)](https://img.shields.io/github/license/alexedwards/flow) ![Code size](https://img.shields.io/github/languages/code-size/alexedwards/flow)
+[![Go Reference](https://pkg.go.dev/badge/github.com/alexedwards/flow.svg)](https://pkg.go.dev/github.com/alexedwards/flow) [![MIT](https://img.shields.io/github/license/alexedwards/flow)](https://img.shields.io/github/license/alexedwards/flow) ![Code size](https://img.shields.io/github/languages/code-size/alexedwards/flow)
 
 A delightfully tiny but powerful HTTP router for Go web applications
 </div>
@@ -121,6 +121,10 @@ mux.HandleFunc("/foo", ...) // This route will use middleware1 only.
 mux.Use(middleware2)
 mux.HandleFunc("/bar", ...) // This route will use both middleware1 and middleware2.
 ```
+
+### Performance
+
+Flow is designed for code simplicity and readability, rather than performance, but the [independent benchmarks here](https://web-frameworks-benchmark.netlify.app/compare?f=flow,nethttp,chi,gorilla-mux,httprouter,nethttp) suggest that it performs similar to other popular Go routers like `http.ServeMux`, `chi`, `httprouter` and Gorilla `mux`.
 
 ### Thanks
 
